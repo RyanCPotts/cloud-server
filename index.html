@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Server Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .server-status {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .status-card {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1.5rem;
+            transition: transform 0.3s;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .status-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .status-icon {
+            font-size: 1.8rem;
+            margin-right: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .status-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .status-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .online {
+            color: #27ae60;
+        }
+        
+        .offline {
+            color: #e74c3c;
+        }
+        
+        .warning {
+            color: #f39c12;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .control-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .control-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem 0;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .control-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .stop-btn {
+            background-color: #e74c3c;
+        }
+        
+        .stop-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .restart-btn {
+            background-color: #f39c12;
+        }
+        
+        .restart-btn:hover {
+            background-color: #d35400;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .status-grid, .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-cloud"></i> Cloud Server
+        </div>
+        <div class="subtitle">Simple and powerful server management</div>
+    </header>
+    
+    <div class="container">
+        <section class="server-status">
+            <div class="status-header">
+                <h2 class="status-title">Server Status</h2>
+                <button class="refresh-btn" id="refreshStatus">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-server status-icon"></i>
+                        <span class="status-name">Main Server</span>
+                    </div>
+                    <div class="status-details">Status</div>
+                    <div class="status-value online">
+                        <i class="fas fa-circle"></i> Online
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-microchip status-icon"></i>
+                        <span class="status-name">CPU Usage</span>
+                    </div>
+                    <div class="status-details">Current load</div>
+                    <div class="status-value">
+                        <span id="cpuUsage">32%</span>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-memory status-icon"></i>
+                        <span class="status-name">Memory</span>
+                    </div>
+                    <div class="status-details">RAM utilization</div>
+                    <div class="status-value">
+                        <span id="memoryUsage">2.1 GB / 8 GB</span>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-hdd status-icon"></i>
+                        <span class="status-name">Disk Space</span>
+                    </div>
+                    <div class="status-details">Storage usage</div>
+                    <div class="status-value">
+                        <span id="diskUsage">120 GB / 500 GB</span>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-network-wired status-icon"></i>
+                        <span class="status-name">Network</span>
+                    </div>
+                    <div class="status-details">Current traffic</div>
+                    <div class="status-value">
+                        <span id="networkTraffic">5.2 Mbps</span>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <i class="fas fa-clock status-icon"></i>
+                        <span class="status-name">Uptime</span>
+                    </div>
+                    <div class="status-details">Since last restart</div>
+                    <div class="status-value">
+                        <span id="uptime">3 days, 7 hours</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="controls">
+            <div class="control-card">
+                <h3 class="control-title">Server Control</h3>
+                <button class="control-btn" id="startServer">
+                    <i class="fas fa-play"></i> Start Server
+                </button>
+                <button class="control-btn stop-btn" id="stopServer">
+                    <i class="fas fa-stop"></i> Stop Server
+                </button>
+                <button class="control-btn restart-btn" id="restartServer">
+                    <i class="fas fa-redo"></i> Restart Server
+                </button>
+            </div>
+            
+            <div class="control-card">
+                <h3 class="control-title">User Management</h3>
+                <button class="control-btn" id="viewUsers">
+                    <i class="fas fa-users"></i> View Users
+                </button>
+                <button class="control-btn" id="addUser">
+                    <i class="fas fa-user-plus"></i> Add User
+                </button>
+                <button class="control-btn" id="configAccess">
+                    <i class="fas fa-user-shield"></i> Configure Access
+                </button>
+            </div>
+            
+            <div class="control-card">
+                <h3 class="control-title">Configuration</h3>
+                <button class="control-btn" id="serverSettings">
+                    <i class="fas fa-cogs"></i> Server Settings
+                </button>
+                <button class="control-btn" id="networkSettings">
+                    <i class="fas fa-network-wired"></i> Network Settings
+                </button>
+                <button class="control-btn" id="securitySettings">
+                    <i class="fas fa-shield-alt"></i> Security Settings
+                </button>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Cloud Server Management | <a href="https://github.com/RyanCPotts/cloud-server" target="_blank">GitHub Repository</a></p>
+    </footer>
+
+    <script>
+        // Sample JavaScript for functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Server status refresh
+            document.getElementById('refreshStatus').addEventListener('click', function() {
+                // In a real application, this would fetch data from an API
+                console.log('Refreshing server status...');
+                // Simulate loading
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                setTimeout(() => {
+                    // Update with random values for demonstration
+                    document.getElementById('cpuUsage').textContent = Math.floor(Math.random() * 100) + '%';
+                    document.getElementById('memoryUsage').textContent = (Math.random() * 4).toFixed(1) + ' GB / 8 GB';
+                    document.getElementById('diskUsage').textContent = Math.floor(Math.random() * 200 + 100) + ' GB / 500 GB';
+                    document.getElementById('networkTraffic').textContent = (Math.random() * 10).toFixed(1) + ' Mbps';
+                    
+                    // Reset button
+                    this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                }, 1000);
+            });
+            
+            // Server control buttons
+            document.getElementById('startServer').addEventListener('click', function() {
+                alert('Server start command sent!');
+            });
+            
+            document.getElementById('stopServer').addEventListener('click', function() {
+                const confirmation = confirm('Are you sure you want to stop the server?');
+                if (confirmation) {
+                    alert('Server stop command sent!');
+                }
+            });
+            
+            document.getElementById('restartServer').addEventListener('click', function() {
+                const confirmation = confirm('Are you sure you want to restart the server?');
+                if (confirmation) {
+                    alert('Server restart command sent!');
+                }
+            });
+            
+            // Other buttons would have similar event listeners in a real application
+            const otherButtons = [
+                'viewUsers', 'addUser', 'configAccess', 
+                'serverSettings', 'networkSettings', 'securitySettings'
+            ];
+            
+            otherButtons.forEach(id => {
+                document.getElementById(id).addEventListener('click', function() {
+                    alert(`The ${this.textContent.trim()} feature would open here.`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
