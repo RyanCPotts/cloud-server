@@ -101,6 +101,16 @@ app.get('/api/stats', (req, res) => {
 
 // Start server
 app.post('/api/control/start', (req, res) => {
+  // Add before control routes
+const authenticateUser = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${process.env.API_KEY}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
+// Then use: app.post('/api/control/start', authenticateUser, (req, res) => {
   // Add authentication and authorization checks here
   
   // Mock implementation
