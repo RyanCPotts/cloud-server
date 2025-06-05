@@ -49,6 +49,15 @@ app.use(compression());
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Authentication middleware (FIXED - moved outside route handlers)
+const authenticateUser = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${process.env.API_KEY}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
 // Define basic routes
 
 // Home route
@@ -100,19 +109,7 @@ app.get('/api/stats', (req, res) => {
 // you would implement actual server control logic.
 
 // Start server
-app.post('/api/control/start', (req, res) => {
-  // Add before control routes
-const authenticateUser = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.API_KEY}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  next();
-};
-
-// Then use: app.post('/api/control/start', authenticateUser, (req, res) => {
-  // Add authentication and authorization checks here
-  
+app.post('/api/control/start', authenticateUser, (req, res) => {
   // Mock implementation
   setTimeout(() => {
     res.json({ 
@@ -124,9 +121,7 @@ const authenticateUser = (req, res, next) => {
 });
 
 // Stop server
-app.post('/api/control/stop', (req, res) => {
-  // Add authentication and authorization checks here
-  
+app.post('/api/control/stop', authenticateUser, (req, res) => {
   // Mock implementation
   setTimeout(() => {
     res.json({ 
@@ -138,9 +133,7 @@ app.post('/api/control/stop', (req, res) => {
 });
 
 // Restart server
-app.post('/api/control/restart', (req, res) => {
-  // Add authentication and authorization checks here
-  
+app.post('/api/control/restart', authenticateUser, (req, res) => {
   // Mock implementation
   setTimeout(() => {
     res.json({ 
@@ -166,13 +159,6 @@ app.use((req, res) => {
     error: 'Not Found',
     message: `The requested resource at ${req.path} was not found`
   });
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`http://localhost:${PORT}`);
-  console.log('Press Ctrl+C to stop');
 });
 
 /**
@@ -206,4 +192,14 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-module.exports = app; // Export for testing purposes
+// Export the app for testing (IMPORTANT: Don't start server when imported)
+module.exports = app;
+
+// Only start server if this file is run directly (not imported)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`http://localhost:${PORT}`);
+    console.log('Press Ctrl+C to stop');
+  });
+}

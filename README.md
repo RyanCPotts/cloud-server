@@ -1,6 +1,5 @@
 # cloud-server (express)
 
-CURRENTLY WORKING ON TESTS
+replace .env placeholder with API KEY
 
-index.js is the baller
-index.html is frontend'ish
+The tests are production-ready with proper timeouts for async operations, comprehensive assertions, and realistic scenarios.
